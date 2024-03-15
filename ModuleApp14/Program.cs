@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using System.Net.Cache;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -11,25 +12,26 @@ class Program
     {
         Console.OutputEncoding = Encoding.UTF8;
 
-        string[] text = { "Раз два три четыре пять шесть семь восемь девять десять", 
-            "Шла Саша по шоссе и сосала сушку"};
+        List<Student> students = new List<Student>()
+        {
+            new Student {Name="Андрей", Age=23, Languages = new List<string> {"английский", "немецкий" }},
+            new Student {Name = "Василиса", Age = 24, Languages = new List<string>{"английский", "французский"}},
+            new Student {Name = "Никита", Age = 30, Languages = new List<string>{"английский", "испанский"}},
+            new Student {Name = "Лариса", Age = 18, Languages = new List<string>{"испанский", "немецкий"}}
+        };
 
-        var result = from str in text
-                     from word in str.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                     select word;
+        var selectedStudents = students.SelectMany(s => s.Languages, (s, l) => new { Student = s, Lang = l })
+            .Where(s => s.Lang == "немецкий" && s.Student.Age < 30)
+            .Select(s => s.Student);
 
-        foreach( var word in result )
-            Console.WriteLine(word);
+        foreach(var student in selectedStudents)
+            Console.WriteLine($"{student.Name} --> {student.Age}");
     }
 }
 
-class City
+class Student
 {
     public string Name { get; set; }
-    public long Population { get; set; }
-    public City(string name, long population)
-    {
-        Name = name;
-        Population = population;
-    }
+    public int Age { get; set; }
+    public List<string> Languages { get; set; }
 }
